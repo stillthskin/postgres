@@ -1,0 +1,35 @@
+N/B:
+-CAST
+SELECT CAST ("10" AS INTEGER);
+TO_CHAR('99','$999099') = $ 99.00
+-DORMAIN
+CREATE DORMAIN addr varchar(100) NOT NULL;
+CREATE TABLE(
+	address addr;
+);
+-Composite data
+CREATE TYPE address AS (
+	postal varchar(50)
+
+);
+CREATE TABLE table(
+	id,
+	addr address; --composite above
+);
+INSERT VALUE(ROW())
+
+
+_________Topic List_________
+-Data conversion(implicit(Auto),explicit(Via Fn)).
+-Cast Conversion.
+-Round(10,4)--10 to 4 .dp
+-substr('jello',1)--from 1 index to end.
+-TO_CHAR('string','format')
+-TO_NUMBER('string','format')
+-------User Data Types---------
+CREATE DORMAIN  --commonly used data eg varchar(100)
+-Composite data
+-ENUM --similar check but compositer
+
+
+

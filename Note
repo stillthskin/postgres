@@ -1,0 +1,162 @@
+N/B:
+____THE SFWOLO of SELECT_____
+SELECT * FROM table WHERE ORDER COLUMN ASC BY LIMIT OFFSET/FETCH
+-Insert multiple records = values('set 1'),('set 2');
+-RETURNING * = returns the new added row(s).--Usually after the insert command.
+-Many to many create a *Junction table.
+-update column values
+update table
+set column=value, column 2 = value 2 
+where column = value
+Insert into table(columns) values (value)
+-update all column values
+update table
+set column=value, column 2 = value 2
+-Upsert
+Insert into table(columns) 
+value(values) On Conflict(column)
+Do Nothing
+Insert into table(columns) 
+value(values) On Conflict(column)
+Do update set column = Excluded.column --new value
+-ALIASES
+SELECT column AS "Column Name" FROM table
+- ORDER BY NULL 
+Select column, length(column) as len from table order by len asc;
+SELECT * FROM table ORDER BY column NULLS LAST
+
+- Distinct
+Select DISTINCT column from table --show unique occurrence.
+
+-LIMIT OFFSET FETCH
+SELECT * FROM table
+order by column desc
+limit 5
+
+SELECT * FROM table
+order by column desc
+offset 5 --start from the 6th
+
+order by column desc
+fetch start row only 5 --all the first 5
+-IN NOTIN
+select * from table where column in (value, value 2, value 3);
+SELECT * FROM table WHERE username LIKE 'A%'
+
+-UUID
+CREATE EXTENSION IF NOT EXISTS 'uuid-ossp';
+SELECT uuid_generate_v1();
+SELECT uuid_generate_v4(); --Random number no mac no Timestamp to gen.
+-hstore
+CREATE EXTENSION IF NOT EXISTS 'store';  --json-like entry
+insert into table(hstore-column) value('Key => value')
+-JSON
+CREATE TABLE table(
+	t_id SERIAL PRIMARY KEY,
+	data JSON
+);
+INSERT INTO table (data)
+	VALUE({"Key":"Value"})
+	
+_________constraint__________
+ALTER TABLE table
+ADD CONSTRAINT name TYPE(column) --if Foreign REFFERENCES FTable(column)
+
+
+
+_________Topic List_________
+-Create DB
+-Install data from .sql file
+-Northwind .sql MS db
+-Drop DB
+-Create table 
+-Alter table add column name reference Other-Table(column) --adding foreign key
+-Drop table
+-update table
+-Delete From table(With where/without Where=allrecords)
+-Upsert
+-Aliases
+-Expression || combine/concat
+-OrderBy expression.
+-Distinct
+-Operators
+-Logical And, or
+-Comparison <,>,<=,>=,!=
+-LIMIT
+-OFFSET
+-FETCH
+-IN and NOTIN -- return true false(select * == to in ('list'))
+-BETWEEN AND NOTBETWEEN
+-Data Types
+-Boolean(TRUE(t),FALSE(f),YES(y),NO(N),1,0)
+-DATE, TIME TIMESTAMP, TIMESTAMPTZ 
+-UUID
+-hstore
+-json *To review.
+-Network Address( column dataType(inet))
+-ALTER TABLE RENAME table TO table 2.
+- " RENAME COLUMN name TO name 2.
+- " ADD CHECK (column IN('Y','N'))
+
+CREATE ROLE dennis WITH
+	LOGIN
+	NOSUPERUSER
+	CREATEDB
+	NOCREATEROLE
+	INHERIT
+	NOREPLICATION
+	CONNECTION LIMIT -1 --Unlimited con
+	PASSWORD '';
+
+
+_________________TABLE CREATION___________________
+CREATE TABLE actors(actor_id SERIAL PRIMARY KEY,
+                   first_name VARCHAR(150),
+                    last_name VARCHAR(150) NOT NULL
+                   ,gender CHAR(1)
+                   ,date_of_birth DATE
+                   ,add_date DATE
+                   ,update_date DATE);
+
+CREATE TABLE directors(
+    director_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(150),
+    last_name VARCHAR(150),
+    date_of_birth DATE,
+    nationality VARCHAR(50),
+    add_date DATE,
+    update_date DATE
+);
+
+CREATE TABLE movies(
+    movie_id SERIAL PRIMARY KEY,
+    movie_name VARCHAR(100),
+    movie_length INT,
+    movie_lang VARCHAR(20),
+    age_certification VARCHAR(10),
+    release_date DATE
+
+
+);
+
+ALTER TABLE movies ADD COLUMN  director_id INT REFERENCES directors(director_id);
+
+SELECT * FROM movies;
+
+CREATE TABLE movies_revenues(
+    revenue_id SERIAL PRIMARY KEY,
+    movie_id INT REFERENCES movies(movie_id),
+    revenue_domestic NUMERIC(10,2),
+    revenue_international NUMERIC(10,2)
+    );
+
+SELECT * FROM movies_revenues;
+
+
+______________Foreign Table With Two PKeys___________________
+CREATE TABLE movies_actors(
+    movie_id INT REFERENCES movies(movie_id),
+    actor_id INT REFERENCES actors(actor_id),
+    PRIMARY KEY (movie_id,actor_id)
+    );
+
