@@ -1,4 +1,5 @@
 N/B:
+LIKE J%  -- Starts in capital J
 ____THE SFWOLO of SELECT_____
 SELECT * FROM table WHERE ORDER COLUMN ASC BY LIMIT OFFSET/FETCH
 -Insert multiple records = values('set 1'),('set 2');
@@ -9,7 +10,7 @@ update table
 set column=value, column 2 = value 2 
 where column = value
 Insert into table(columns) values (value)
--update all column values
+-update all column values  --Without the where clause.
 update table
 set column=value, column 2 = value 2
 -Upsert
@@ -48,7 +49,7 @@ CREATE EXTENSION IF NOT EXISTS 'uuid-ossp';
 SELECT uuid_generate_v1();
 SELECT uuid_generate_v4(); --Random number no mac no Timestamp to gen.
 -hstore
-CREATE EXTENSION IF NOT EXISTS 'store';  --json-like entry
+CREATE EXTENSION IF NOT EXISTS 'hstore';  --json-like entry
 insert into table(hstore-column) value('Key => value')
 -JSON
 CREATE TABLE table(
@@ -97,6 +98,12 @@ _________Topic List_________
 -ALTER TABLE RENAME table TO table 2.
 - " RENAME COLUMN name TO name 2.
 - " ADD CHECK (column IN('Y','N'))
+----date_part------
+SELECT date_part('century',timestamp '2023-06-10'); -- 21 century
+
+-----TZ-------
+SET time zone 'Africa/Nairobi';
+SHOW TIME ZONE
 
 CREATE ROLE dennis WITH
 	LOGIN
@@ -119,7 +126,7 @@ CREATE TABLE actors(actor_id SERIAL PRIMARY KEY,
                    ,update_date DATE);
 
 CREATE TABLE directors(
-    director_id SERIAL PRIMARY KEY,
+     director_id SERIAL PRIMARY KEY,
     first_name VARCHAR(150),
     last_name VARCHAR(150),
     date_of_birth DATE,

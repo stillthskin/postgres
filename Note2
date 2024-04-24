@@ -1,7 +1,23 @@
 N/B:
+-introduce aggregate function all before columns must be in the group BY clause;
+LIKE J%  -- Starts in capital J
 -CAST
 SELECT CAST ("10" AS INTEGER);
 TO_CHAR('99','$999099') = $ 99.00
+-----constraint------
+-CHECK CONSTRAINT ON MULTIPLE COLUMNS
+ALTER TABLE ADD CONSTRAINT price_check CHECK(
+price > 0,
+discount >= 0,
+price > discount
+);
+
+-ALTER TABLE
+ALTER COLUMN column SET NOT NULL;
+
+-ALTER TABLE 
+ADD CONSTRAINT c_name UNIQUE(column, column);
+
 -DORMAIN
 CREATE DORMAIN addr varchar(100) NOT NULL;
 CREATE TABLE(
@@ -12,12 +28,55 @@ CREATE TYPE address AS (
 	postal varchar(50)
 
 );
+-Containment operator @>
+SELECT * FROM table
+WHERE jsonColumn @> '{"key":"val"}'
+
+-Existence ? operator
+SELECT * FROM table 
+WHERE JsonColumn->key
+------DATE TO CHAR------
+select to_char(order_date,'DDth Mon YYYY')  from orders;
 CREATE TABLE table(
 	id,
 	addr address; --composite above
 );
 INSERT VALUE(ROW())
+CREATE TYPE status_enum AS ENUM ('waiting','running','done')
+CREATE TABLE(
+	id;
+	status status_enum;
+);
 
+-
+CREATE SEQUENCE seq_name
+	increment -1
+	minvalue 1
+	maxvalue 3
+	start 3
+	cycle; --Loop Through.
+
+CREATE TABLE tab_seq(
+	tab_is SERIAL PRIMARY KEY,
+	tab_sequencer nextval(seq_name)
+);
+
+select substring ('CANDELABRABRACADRY') from 8 for 3;
+_______UNION WITH NULL_______
+SELECT
+    first_name,
+    NULL as second_name
+    'actor' as Roles
+from actors
+WHERE left(first_name,1) = 'A'
+UNION
+SELECT
+    first_name,
+    last_name,
+    'director' as Roles
+from directors
+WHERE left(first_name,1) = 'A';
+	
 
 _________Topic List_________
 -Data conversion(implicit(Auto),explicit(Via Fn)).
@@ -30,6 +89,86 @@ _________Topic List_________
 CREATE DORMAIN  --commonly used data eg varchar(100)
 -Composite data
 -ENUM --similar check but compositer
+-Constraints
+	pkey
+	unique
+	not null
+	fkey
+	check	
+-CREATE SEQUENCE seq_name;
+-String orp
+	-UPPER
+	-LOWER
+	-INITCAP(pascal case)
+	-LEFT("ABCDEFG",2) = "AB" -2 all but last 2
+	-RIGHT
+	-REVERSE
+	-CHAR_LENGHT()
+	-SPLIT_PART('str',delim,return)
+	-Trim, LTrim, BTrim,RTrim
+	-LPAD, RPAD
+	-SUBSTRING
+	-REPEAT
+	-REPLACE
+	-SUM
+	-MIN/MAX
+	-AVG --Average
+-DATE
+-MAKE_DATE()
+-MAKE_TIME()
+-AGE(1997-10-06)
+-ORDER BY(); column + aggregate_funct(); --column must be in the order by clause
+-HAVING
+   condition;
 
+WHERE vs HAVING --Having = result : where = query
+COALESCE(column,alt(if null))
+-Inner Join
+SELECT TB1.col, TB2.col FROM TB1 INNER JOIN TB2 ON TB1.tb2_id = TB2.tb2_id;
+-USING
+SELECT TB1.col, TB2.col FROM TB1 INNER JOIN TB2 USING(tb2_id)
 
-
+INNER JOIN
+LEFT JOIN
+RIGHT JOIN
+FULL JOIN
+CROSS JOIN --SELECT * FROM Table 1, Table 2
+NATURAL JOIN --Auto detects common field no ON clause.
+UNION --Join Two tables(Number of columns and data types must be similar)
+UNION with null --When there are different number of columns.
+INTERSECT --Similar syntax to union gives the similar records.
+EXCEPT -- Rows in the first query that do not appear in the second query.
+CREATE SCHEMA
+ALTER SCHEMA
+SEARCH PATH
+DUPLICATE SCHEMA pg_dump -d test_db -h localhost -u postgres -n public > dump.sql
+psql -h localhost -u postgres -d test_db -f dump.sql
+GRANT USAGE ON SCHEMA sc_name TO user
+ARRAY[1,2,3,4,5,6]
+INT4RANGE(1,4,'[]') --closed closed range of 1-4   [) closed open by default.
+INT4RANGE(1,4) @> INT4RANGE(2,3)  --true contains
+ARRAY[1,2,3,4,5,6]  @> ARRAY[1,2,3,4,5,6]  --any overlap = true
+ARRAY_CAT(2 arrays) or ||
+ARRAY_PREPEND(numb ,array) array_append()
+ARRAY_NDIMS
+ARRAY_POSITION(array,element)--arrays from 1 index not 0
+ARRAY_REMOVE(array,element)
+ARRAY_REPLACE(array,element,with)
+SELECT 23 = ANY/ALL(array) true or false
+STING_TO_ARRAY('1,2,3,4,ABC',',','ABC') = {[1,2,3,4,null]}
+ARRAY_TO_STRING(array,delim)
+ARRAY_TO_STRING(array,delim,'nothing') --null to nothing 
+unnest(array_column) split each array to each row
+UPDATE table 
+SET json_column=Json_column || '"Key":"value"'
+WHERE json_column=json_column;
+____ROW TO JSON____
+SELECT row_to_json(t) FROM
+(SELECT 
+	first_name
+	last_name
+	email
+	phone
+FROM users) AS t     --{first_name:Den last_name:pak email:denpak@mail.com phone:+254700232323}
+json_agg();
+json_build_array(--Even No of elements as k:v);

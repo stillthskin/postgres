@@ -1,0 +1,199 @@
+N/B:
+-introduce aggregate function all before columns must be in the group BY clause;
+--AKA give me the output of the aggregate function grouped by column
+--Group By also gives unique.
+LIKE J%  -- Starts in capital J
+_________Topic List_________
+EXPLAIN ANALYZE SELECT --statistical data on the query
+________Indexes to speedup lookup__________
+sequential scan when no index created-- Know by using explain select.
+CREATE INDEX index_name ON table USING GIN(jsonColumn);
+CREATE INDEX index_name ON table USING hash(jsonColumn);
+CREATE INDEX idx_ind_name ON table(s)(column(s));
+CREATE UNIQUE INDEX idx_u_ind_name ON table(s)(column(s));
+Nodes and cost
+JOIN NODES(hash joins(Inner/outer join)) 
+
+Type of index
+B-tree index
+-Rebuild Index
+REINDEX [VERBOSE] idx_name;
+
+
+____MY_Copy_Table_____
+CREATE TABLE directors_copy AS SELECT * FROM directors order by random();
+
+____Partial_Index_____
+CREATE INDEX index_name on table(column)
+WHERE column NOT IN('common_reap_value');
+
+CREATE INDEX CONCURRENT --does not invoke an exclusive lock on the table hence table usable while creating.
+
+_______VIEWS_________
+Stored queries
+CREATE OR REPLACE VIEW v_mvdetails AS
+SELECT
+mv.movie_length,
+mv.movie_name,
+dr.director_id,
+dr.first_name
+FROM movies as mv
+INNER JOIN directors  as dr on mv.director_id = dr.director_id;
+____USES VIEW____
+select * from v_mvdetails;
+ALTER VIEW vname RENAME TO new_vname;
+DROP vname;
+WHERE With views --as it sounds
+cannot change order of columns in views with CREATE OR REPLACE instead CAN change the number
+______Updatable Views________
+
+CREATE OR REPLACE VIEW v_cities AS
+SELECT city_name
+	city_code
+FROM cities
+WHERE city_code = 'us'
+WITH CHECK OPTION;
+INSERT INTO v_cities(city_name, city_code) values('Texas','us');
+
+_______MATERIALIZED VIEW___________
+CACHED DATA --view runs once and stores cached data
+CREATE OR REPLACE MATERIALIZED VIEW IF NOT EXISTS m_vname WITH [NO] DATA;
+REFRESH MATERIALIZED VIEW m_cname;--RERUN The materialized query;
+_______SUB_QUERY_______
+
+outer_query where=returns||in retrurns(inner_query);
+SUBQUERY with WHERE
+SUBQUERY with IN
+SUBQUERY with ANY
+SUBQUERY with ALL
+SUBQUERY with EXISTS
+___CASE____
+(
+CASE
+	WHEN condition   THEN ''
+	WHEN condition 2 THEN ''
+	ELSE ''
+END
+
+)
+
+____CTE____
+WITH cte_name AS
+(
+SELECT f_name, l_name from table_name;
+)
+SELECT * FROM cte_name;
+
+___SUB_TOTALS_ROLLUP__
+SELECT movie_name
+	release_date
+	genre,
+	sum(revenue),
+	from movies
+	GROUP BY ROLLUP(release_date,genre)
+--ROLLUP Creates row for subTotal, rows for individual totals.
+
+_____REGEX_____
+.         -Wild character find anything.
+[XTr]     -Find the characters inside the curliez.
+[a-z]     -series of characters e.g. kdsajhkds.
+[^a-z]    -Negate Not.
+\w        -[a-zA-Z0-9_] letter and numb combination _ included.
+\t        -Tab char
+\s        -Space.
+\d        -Digit.
+\n        -Newline.
+^         -Match at the start of a string.
+%         -Match at the end of a string.
+?         -Get the preceding 0 or one times
++         -Get the preceding 1 or more times
+*         -Get the preceding 0 or more times
+{m}       -Get the preceding exactly m times
+{m,n}     -Get the preceding exactly m and n times
+a|b       -Alteration either m or n times
+()        -Get the capture group
+(?:)      -Negate the capture group
+
+SIMILAR TO = like --with s% pattern
+~      -match regex, Case sensitive
+~*     -match regex, Case insensitive
+!~     -Not match regex, Case sensitive
+!~*    -Not match regex, Case insensitive
+
+SELECT regexp_matches('The movie will Done start at 8 p.m on Dec, 2020.','D[a-zA-Z]*','g');
+REGEXP_REPLACE('string','pattern','Replacement');
+REGEXP_SPLIT_TO_TABLE('string','delim');
+REGEXP_SPLIT_ARRAY('string','delim');
+_____CUBE(1,2)_____
+--all combinations of 1 and 2;
+
+SELECT country,region
+       ,AVG((imports/1000000),2)
+       FROM trades
+       WHERE country IN ('US','UK')
+       GROUP BY CUBE('region',country)
+_____GROUPING SET(1,2)_____
+--Define order of grouping preceded by () totals;
+
+SELECT country,region
+       ,AVG((imports/1000000),2)
+       FROM trades
+       WHERE country IN ('US','UK')
+       GROUP BY GROUPING SET(
+       (),
+       'region'
+       ,country)
+_____FILTER(1,2)_____
+SELECT country,region
+       ,AVG(imports) FILTER(WHERE year<1995) --Do averages of less than 1995
+       FROM trades
+       WHERE country IN ('US','UK')
+       GROUP BY CUBE('region',country)
+ 
+___WINDOWS_FunC_____
+INSTEAD OF SHRINKING ROWS BY aggregate func, ROWS MAINTAIN. 
+SELECT country, imports, exports, AVG(exports) OVER() AS Average_EXPO FROM trades;
+___WINDOWS_FunC_partition____
+SELECT country, imports, exports, AVG(exports) OVER(PARTITION BY country) AS Average_EXPO FROM trades;
+SELECT country, imports, exports, AVG(exports) OVER(PARTITION BY year<2000) AS Average_EXPO FROM trades;
+
+___Moving average window___
+
+SELECT imports, year, min(imports) OVER
+(partition by country ORDER BY year ROWS BETWEEN 1 PRECEDING 1 FOLLOWING EXCLUDING CURRENT ROW)
+FROM trades WHERE year>'1994';
+
+___THE WINDOW___
+OVER() -- THIS IS THE WINDOW.
+ROWS BETWEEN A AND B --These are the frames.
+DEFAULT = ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW.
+UNBOUNDED[PRECEDING|FOLLOWING]
+CURRENT ROW
+
+SELECT *,ARRAY_AGG(x) OVER(order by x ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)
+FROM generate_series(1,5) as x;
+SELECT country,year,exports, min(exports) over(w), max(exports) over(w) FROM trades WHERE country='Kenya' WINDOW w as(order by year)
+
+__RANK__
+SELECT country,year,exports, min(exports) over(w), max(exports) RANK() over(order by year) FROM trades WHERE country='Kenya';
+__NTILE__
+SPIT DATA INTO EQUAL RANKED BUCKETS.
+__LEAD()LAG()__
+LEAD(ROW,2)--Two rows after.
+LAG(ROW,2)--Two rows prior.
+
+SELECT exports, LEAD(exports,2) OVER(order by year) WHERE country = 'Belgium';--Value for lead column = 2 rows down from the curr export
+
+FIRST_VALUE(col),LAST_VALUE(col),NTH_VALUE(col,2)
+ROW_NUMBER()
+
+__ROW_NUMBER WITH PARTITION||ORDER__
+SELECT e.first_name,e.last_name, e.salary,d.department_name, ROW_NUMBER() OVER(PARTITION BY d.department_name ORDER BY salary desc)as part FROM employees as e
+join departments d on e.department_id = d.department_id;
+__PERCENTAGE FROM OVER__
+SELECT first_name,salary, sum(salary) OVER() as total, round(salary/sum(salary) OVER()*100,2) AS percentage  FROM employees order by 4 desc;
+__RUNNING TOTAL__
+SELECT first_name, salary,sum(salary) OVER(),  sum(salary) OVER( order by salary desc ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS "Running Total" from employees;
+__LEAD LAG DIFFERENCE__
+SELECT first_name, salary, salary-lead(salary,1) over (order by salary desc ) AS DIfference FROM employees;
+

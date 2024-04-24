@@ -1,0 +1,97 @@
+Window functions in PostgreSQL allow you to perform calculations across a set of rows related to the current row within the query's result set. They are useful for computing aggregations over partitions of data and for performing operations such as running totals, ranks, and moving averages.
+
+### Key Concepts:
+
+- **Window Function**: A function that performs calculations across a set of rows related to the current row.
+- **PARTITION BY**: Divides the result set into partitions to apply the window function separately to each partition.
+- **ORDER BY**: Orders the rows within each partition before applying the window function.
+- **Frame**: A subset of the partition, which defines the rows that are used for calculations with each row.
+
+### Common Window Functions:
+
+- **Aggregate Functions**: Functions like `SUM()`, `AVG()`, `MAX()`, `MIN()`, and `COUNT()` can be used as window functions.
+- **Ranking Functions**: Functions like `ROW_NUMBER()`, `RANK()`, and `DENSE_RANK()`.
+- **Analytical Functions**: Functions like `LAG()`, `LEAD()`, `FIRST_VALUE()`, `LAST_VALUE()`, and `NTILE()`.
+
+### Syntax:
+
+The syntax for a window function in PostgreSQL is as follows:
+
+```sql
+function_name(arguments) OVER (
+    PARTITION BY column1, column2, ...
+    ORDER BY column1 [ASC | DESC], column2 [ASC | DESC], ...
+    [frame_clause]
+)
+```
+
+The `frame_clause` specifies a range of rows over which the function is evaluated.
+
+### Examples:
+
+1. **Running Total**:
+
+    Calculate the running total of sales by partitioning data by `department` and ordering by `date`.
+
+    ```sql
+    SELECT
+        department,
+        date,
+        sales,
+        SUM(sales) OVER (
+            PARTITION BY department
+            ORDER BY date
+        ) AS running_total
+    FROM
+        sales_data;
+    ```
+
+2. **Rank of Rows**:
+
+    Calculate the rank of employees based on their salaries.
+
+    ```sql
+    SELECT
+        employee_id,
+        salary,
+        RANK() OVER (
+            ORDER BY salary DESC
+        ) AS salary_rank
+    FROM
+        employees;
+    ```
+
+3. **Lag and Lead**:
+
+    Find the previous and next values for a column.
+
+    ```sql
+    SELECT
+        id,
+        value,
+        LAG(value) OVER (
+            ORDER BY id
+        ) AS previous_value,
+        LEAD(value) OVER (
+            ORDER BY id
+        ) AS next_value
+    FROM
+        my_table;
+    ```
+
+4. **NTILE**:
+
+    Divide rows into quartiles (four equal partitions) based on a column.
+
+    ```sql
+    SELECT
+        employee_id,
+        salary,
+        NTILE(4) OVER (
+            ORDER BY salary DESC
+        ) AS salary_quartile
+    FROM
+        employees;
+    ```
+
+These are some examples of how you can use window functions in PostgreSQL. You can use them for a variety of analytical and ranking tasks, making them a powerful tool in data analysis.
