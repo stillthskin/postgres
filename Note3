@@ -197,3 +197,4 @@ SELECT first_name, salary,sum(salary) OVER(),  sum(salary) OVER( order by salary
 __LEAD LAG DIFFERENCE__
 SELECT first_name, salary, salary-lead(salary,1) over (order by salary desc ) AS DIfference FROM employees;
 
+Sympathetic Chain ganglia 

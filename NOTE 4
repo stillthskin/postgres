@@ -1,0 +1,108 @@
+N/B:
+__INSTALL POSTGRES__
+__MAC__ 
+Postgresql.org -- for the EDB installer download.
+GUI install with password,user,port prompt.
+__Windows__
+Postgresql.org -- for the EDB installer download.
+GUI install with password,user,port prompt.
+
+
+__to_tsvector__
+to_tsvector('the quicker browner fox jumped over the lazier fox');
+SELECT to_tsvector('the quicker browner fox jumped over the lazier fox')
+@@ to_tsquery('fox')-- Returns true;
+
+CREATE TABLE ts_search
+(
+ts_id SERIAL PRIMARY KEY,
+text_norm text,
+text_totsvector tsvector
+)
+INSERT INTO ts_search(text_norm,text_totsvector) 
+values('the quicker browner fox jumped over the lazier fox',to_tsvector(text_norm));
+
+__COPY FROM CSV__
+ \copy docs_presidential(president,title,speech_date,speech_text)FROM 'president_speeches.csv' WITH (FORMAT CSV, DELIMITER '|',HEADER OFF,QUOTE '@');
+
+
+
+
+
+
+_________Topic List_________
+-tsvector --Reduce words into lexemes. Washed,washing,washes become wash.
+-@@ tsquery
+-Match operator(@@)
+-to_tsquery('text'<->'other') is text next to other --order matters. 
+-to_tsquery('text'<2>'other') is text 2 words next to other --order matters.
+-Partitioning tables
+CREATE TABLE master_child() INHERITS (master);
+SELECT * FROM master; --Record from master and child table.
+SELECT * FROM ONLY master; --Implied.
+Types of part
+Range
+List
+Hash
+
+CREATE TABLE employee_range(
+    id bigserial,
+    birth_date date,
+    country_code varchar(4))partition by range(birth_date);
+CREATE TABLE employee_rangey200 PARTITION OF employee_range FOR VALUES FROM ('2000-01-01') TO ('2001-01-10')
+
+___Partition By Year___
+CREATE TABLE employee_range(
+    id bigserial,
+    birth_date date,
+    country_code varchar(4))partition by range(birth_date);
+CREATE TABLE employee_range2000 PARTITION OF employee_range FOR VALUES FROM ('2000-01-01') TO ('2001-01-01');
+INSERT INTO employee_range(birth_date, country_code) values('2001-01-01','US'),('2001-01-02','US'),('2001-12-31','US'),('2001-01-01','US');
+
+SELECT * FROM employee_range;
+SELECT * FROM ONLY employee_range; -- No data only accessible via partitions.
+select * from employee_range2001;
+select * from employee_rangey2000;
+
+__Partition By List__
+CREATE TABLE employee_list(
+    id bigserial,
+    birth_date date NOT NULL,
+    country_code varchar(3)
+) partition by list (country_code);
+SELECT * FROM ONLY employee_list;
+SELECT * FROM employee_listeu;
+SELECT * FROM employee_listus;
+
+CREATE TABLE employee_listus PARTITION OF employee_list for values in('US');
+CREATE TABLE employee_listeu PARTITION OF employee_list for values in('UK','GE','DE');
+INSERT INTO employee_list(birth_date, country_code) values ('2001-10-17','US'),('2003-04-11','UK'),('2001-01-01','US'),('2001-01-02','US'),('2001-12-31','DE'),('2001-01-01','GE');
+
+__Default Partition__
+CREATE employee_listdefault PARTITION OF employee_list DEFAULT; --Handel unhandled partition input.
+
+__Sub Partition__
+CREATE TABLE master_employee(
+    id bigserial,
+    birth_date date NOT NULL,
+    country_code varchar(3)
+) partition by list (country_code);
+
+
+CREATE TABLE master_employee_us PARTITION OF master_employee FOR VALUES IN('US');
+CREATE TABLE master_employee_eu PARTITION OF master_employee FOR VALUES IN('UK','DE','GE')
+PARTITION BY HASH (id);
+
+__Detach partition__
+ALTER TABLE tb_name DETACH PARTITION p_name;
+
+__Alter Range__
+BEGIN TRANSACTION;
+    ALTER TABLE tb_name DETACH PARTITION p_name;
+    ALTER TABLE tb_name ATTACH PARTITION p_name FOR VALUES FROM (0) TO (200);
+COMMIT TRANSACTION;
+
+SHOW ENABLE_PARTITION_PRUNING;
+SET ENABLE_PARTITION_PRUNING = OFF;
+
+

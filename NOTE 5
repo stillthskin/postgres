@@ -1,0 +1,222 @@
+N/B:
+CREATE OR REPLACE FUNCTION fn_name(int, int) RETURNS int AS  || DO  -- For quick testing purpose.
+
+
+__Return Type__
+int
+void
+trigger
+
+CREATE OR REPLACE FUNCTION fn_sum(int, int) RETURNS int AS
+BEGIN
+END;
+LANGUAGE plpgsql;
+
+__FORMAT OUTPUT COMPOSITE RETURN__
+CREATE OR REPLACE FUNCTION fn_latest_hire() RETURNS employees
+    AS
+$$
+    SELECT * FROM employees order by hire_date desc;
+$$LANGUAGE SQL;
+SELECT (fn_latest_hire()).*;
+
+__SETOF__
+CREATE  OR REPLACE FUNCTION fn_returns_hire_per_year(years varchar) RETURNS SETOF employees
+AS $$
+
+    SELECT * FROM employees
+    WHERE extract('YEAR' FROM hire_date)='1992';
+    $$ LANGUAGE SQL;
+
+SELECT fn_returns_hire_per_year('1992');
+
+__DEFAULT PARAM__
+CREATE  OR REPLACE FUNCTION fn_sum(x int DEFALT 10,y int DEFAULT 11)
+SELECT fn_sum() --value 11
+__STRUCTURE PLPGSQL__
+
+CREATE OR REPLACE FUNCTION fn_name(par1 Type,par2 Type) RETURNS type
+AS
+  $$
+   DECLARE
+   	var1 Type;
+   	var ALIAS FOR $1 --aka par1
+   BEGIN
+   END;
+  $$LANGUAGE PLPGSQL;
+__ALIAS FOR(KEY WORD)__  
+var ALIAS FOR $1 --aka par1
+__RAISE NOTICE(print)__
+RAISE NOTICE 'The value of output is %' value; --fstring like;
+__Data Type Inherit__
+varname tabel.column%TYPE; --Inherits the type of column.
+__Query into variable__
+SELECT column FROM table INTO declaredVar;
+RAISE NOTICE 'The feedback is %' declaredVar;
+__IN OUT Replace RETURN__
+
+CREATE OR REPLACE FUNCTION fn_name (IN par1 Type, IN par2 Type, OUT par3 Type)
+AS
+$$
+  par3 = par1 + par2;
+$$ LANGUAGE PLPGSQL;
+
+
+__Blocks__
+<<Block>>
+DECLARE
+BEGIN
+	--Sub Block
+	DECLARE
+	BEGIN
+	END;
+END Block;
+__Returning Query Results__
+
+CREATE OR REPLACE FUNCTION fn_name() RETRUNS SETOF tb_name 
+AS
+$$
+   BEGIN
+      RETURN QUERY SELECT * FROM tb_name;
+   END;
+$$ LANGUAGE PLPGSQL
+
+__CONDITIONAL STMNT__
+
+IF cond..THEN
+ELSE cond... THEN
+END IF;
+
+__LOOP STATEMENT__
+DO
+$$
+    DECLARE
+         i int = 0;
+    BEGIN
+        LOOP
+
+        RAISE NOTICE 'i is: %', i;
+        i=i+1;
+        EXIT WHEN i = 5;
+        END LOOP;
+    end;
+$$ LANGUAGE plpgsql;
+DO
+$$
+    BEGIN
+        FOR i in REVERSE 10..1
+        LOOP
+        RAISE NOTICE 'i is: %', i;
+        END LOOP;
+    end;
+$$ LANGUAGE plpgsql;
+DO
+$$
+    BEGIN
+        FOR i in [REVERSE] 1..10
+        LOOP
+        RAISE NOTICE 'i is: %', i;
+        END LOOP;
+    end;
+$$ LANGUAGE plpgsql;
+__FOR WITH STEP__
+DO
+$$
+    BEGIN
+        FOR i in 1..10 BY 2
+        LOOP
+        RAISE NOTICE 'i is: %', i;
+        END LOOP;
+    end;
+$$ LANGUAGE plpgsql;
+__FOR LOOP WITH RECORD__
+DO
+$$
+    DECLARE
+        rec record;
+    BEGIN
+        FOR rec IN
+            SELECT customer_id, order_id FROM orders LIMIT 10
+        LOOP
+            RAISE NOTICE 'The Customer % Ordered %', rec.customer_id, rec.order_id;
+        end loop;
+    END;
+$$ LANGUAGE PLPGSQL;
+
+__CONTINUE CLAUSE__
+DO
+$$
+    BEGIN
+        FOR i in  1..20
+        LOOP
+        CONTINUE WHEN
+             mod(i,2) = 0;
+         RAISE NOTICE 'i is: %', i;
+
+        END LOOP;
+    end;
+$$ LANGUAGE plpgsql;
+__FOR EACH__
+DO
+$$
+    DECLARE
+        arr1 int[] = array [1,2,3,4];
+        var int;
+    BEGIN
+        foreach var in array arr1
+        LOOP
+            RAISE NOTICE 'The current element is: %', var;
+        end loop;
+    END;
+$$ language plpgsql;
+
+__RETURN TABLE__
+CREATE OR REPLACE FUNCTION fn_pattern(pattern varchar) RETURNS TABLE(contactName varchar, contactTittle varchar)
+AS
+    $$
+        BEGIN
+            RETURN QUERY
+            SELECT
+                contact_name,
+                contact_title
+            FROM customers
+            WHERE customer_id LIKE pattern;
+
+        end;
+    $$ LANGUAGE plpgsql;
+
+SELECT fn_pattern('ALFKI');
+
+RETURN NEXT r --type record
+
+
+__EXCEPTION HANDLING__
+CREATE OR REPLACE FUNCTION fn_find_order() RETURNS SETOF orders
+AS
+    $$
+        DECLARE
+        rec record;
+        uid smallint = 1;
+        BEGIN
+            SELECT
+                *
+            INTO STRICT rec
+            FROM orders
+            WHERE order_id = uid;
+            EXCEPTION
+            WHEN NO_DATA_FOUND||TOO_MANY_ROWS THEN
+              RAISE EXCEPTION 'No data found with the said condition';
+        END;
+
+
+    $$LANGUAGE plpgsql;
+
+SELECT fn_find_order();
+
+
+__ERROR CODE__
+WHEN SQLSTATE 'P0002' = NO_DATA_FOUND
+
+  
+  
+  
