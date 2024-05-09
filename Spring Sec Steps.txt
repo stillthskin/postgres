@@ -1,0 +1,29 @@
+Spring Sec Steps
+@Configuration
+@EnableWebSec
+1. SpringSecurityConfig
+   Inside
+   @Bean SecurityFilterChain  //Not Necessary Initially
+   @Bean AuthenticationProvider
+   	 Provider.setUserDetailsService()
+   	 provider.setPasswordEncoder()
+2. MyUserDetailsService implement UserDetailsService()
+	@overide
+	findByUsername
+	User user = userRepo.findByUserName(username)
+	if(user==Null){
+	 throw new UserNotFoundException("User 404!😆️");
+	}
+	
+3. UserRepo extends JpaRepository(TName,PKeyType){
+   User findByUserName(String username);
+   
+   
+4. UserPrincipal implements UserDetails{
+	@Overide
+	userroles
+	isUserValid
+	etc
+
+}
+

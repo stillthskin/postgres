@@ -61,7 +61,7 @@ CREATE OR REPLACE MATERIALIZED VIEW IF NOT EXISTS m_vname WITH [NO] DATA;
 REFRESH MATERIALIZED VIEW m_cname;--RERUN The materialized query;
 _______SUB_QUERY_______
 
-outer_query where=returns||in retrurns(inner_query);
+outer_query where=returns||in returns(inner_query);
 SUBQUERY with WHERE
 SUBQUERY with IN
 SUBQUERY with ANY

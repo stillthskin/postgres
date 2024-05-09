@@ -1,0 +1,87 @@
+DATABASE SECURITY
+Instant level
+Database level
+Schema level
+Table level
+Column level
+Row level
+
+SCCLR Of roles
+
+REVOKE ALL ON DATABASE db_n FROM PUBLIC   --Remove all public access of db HR from public.
+GRANT db_name TO user;
+GRANT CONNECT ON DATABASE TO user;
+REVOKE ALL ON SCHEMA public ON public;
+CREATE ROLE tech NOSUPERUSER NOLOGIN NOCREATEDB NOCREATEROLE PASSWORD "Welcome";
+GRANT CREATE ON SCHEMA public TO tech;
+
+TABLE LEVEL SEC
+GRANT [SELECT||INSERT||UPDATE||DELETE||TRUNCATE] ON ALL TABLE IN SCHEMA public  TO user;
+
+COLUMN LEVEL ENCRYPTION
+
+CREATE EXTENSION  pgcrypto;
+INSERT INTO users(email,phone) VALUES(pgp_sym_ecrypt('abc@email.com','longsecretencryptionkey')pgp_sym_encrypt('+2547000000','longsecretencryptionkey'));
+
+SELECT pgp_sym_decrypt(email::byte'longsecretencryptionkey'),pgp_sym_decrypt(phone::byte'longsecretencryptionkey') from users;
+
+__SWITCH DB CON__
+\h COMMAND -- show help for the command.
+\c db_name -u username;
+\l list databases
+\dt list tables
+\db table spaces
+\dn list schemas
+\di constrains/indices.
+\ds sequence in the table;
+\dg list roles
+\dT domain data types
+\dD list views.
+\d table_name --describe table;
+\g --run prev command.
+\s --show command hist
+\i -- Run command from file.
+\pset null '' --Represent null ass empty.
+\watch 2 --Run the previous command every 2 seconds.
+\pset linestyle unicode
+\pset border 2
+\timing --turn on query exec time
+SELECT * FROM pg_users; --list all database users.
+
+__List all database sizes__
+SELECT datname as database_name
+pg_size_pretty(pg_database_size(datname) as databse size
+FROM pg_database;
+
+SELECT * FROM information_schema.table;
+SELECT * FROM information_schema.views;
+SELECT * FROM information_schema.table where table_name = 'tb_name';
+
+
+SELECT
+	CURRENT_CATALOG,
+	CURRENT_USER,
+	CURRENT_DATABASE(),
+	CURRENT_SCHEMA,
+	CURRENT_USER,
+	SESSION_USER;
+
+SELECT
+has_database_privilege(db_name,privilege);
+has_schema_privilege(schema,privilege);
+has_table_privilege(schema,privilege);
+has__any_column_privilege(tb_name,privilege);
+SELECT * FROM tb_name INTO tb_name WHERE val='val'
+CREATE TABLE tb_name as(SELECT * FROM tb_name);
+CREATE TABLE tb_name as(SELECT * FROM tb_name) WITH NO DATA;
+\copy tb_name(columns) FROM '/path/to/csv' DELIMITER ',' CSV HEADER;
+\copy tb_name TO '\file_name.csv' DELIMITER ',' CSV HEADER;
+
+
+SELECT * FROM pg_stat_all_tables;
+
+VACUUM FREEZE VERBOSE tb_name   -- Free space
+	
+	
+
+

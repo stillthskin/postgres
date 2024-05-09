@@ -217,6 +217,147 @@ SELECT fn_find_order();
 __ERROR CODE__
 WHEN SQLSTATE 'P0002' = NO_DATA_FOUND
 
+__TRIGGER MASTER__
+CREATE OR REPLACE FUNCTION fn_info() RETURNS TRIGGER AS
+$$
+    BEGIN
+        RAISE NOTICE 'TG_RELNAME %' ,TG_RELNAME;
+        RAISE NOTICE 'G_TABLE_SCHEMA %',TG_TABLE_SCHEMA;
+        RAISE NOTICE 'TG_TABLE_NAME %', TG_TABLE_NAME;
+        RAISE NOTICE 'TG_WHEN %' ,TG_WHEN;
+        RAISE NOTICE 'TG_LEVEL %',TG_LEVEL;
+        RAISE NOTICE 'TG_OP %', TG_OP;
+        RAISE NOTICE 'TG_NARGS %' ,TG_NARGS;
+        RAISE NOTICE 'TG_NAME %' ,TG_NAME;
+        RETURN NEW;
+
+    END;
+$$LANGUAGE plpgsql;
+
+
+__DISALLOW DELETE__
+RETURN NULL ON fn_trigger();
+
+TRUNCATE tb_name;
+SAME AS DELETE FROM tb_name;
+
+__Conditional Trigger__
+CREATE TRIGGER tg_name
+BEFORE UPDATE OR DELETE OR INSERT OR TRUNCATE
+ON tb_name
+FOR EACH STATEMENT
+WHERE
+(
+condition 1 and 
+condition 2
+)
+EXECUTE FUNCTION fn_name();
+
+__LIMIT UPDATE ON PKEY__
+BEFORE UPDATE ON id;
+
+
+__EVENT Triggers__
+ddl_command_start --Before crud;
+ddl_command_end   --After crud;
+table_rewrite     --Before alter table;
+sql_drop          --After Drop DB;
+
+TG_TAG --The action being performed.
+TG_EVENT -- The event done ddl start, stop,rewrite.
+
+
+CREATE OR REPLACE FUNCTION fn_evn_audit() RETURNS EVENT_TRIGGER 
+SECURITY DEFINER    --Execute as sudo
+AS
+$$
+INSERT INTO(
+ddl_event,    --text
+ddl_function, --text
+ddl_time  --timestamp
+)
+VALUE
+(
+TG_EVENT,
+TG_TAG,
+now()
+
+)
+$$ LANGUAGE PLPGSQL;
+
+
+CREATE EVENT TRIGGER
+ON ddl_command_start
+WHEN 
+TAG IN ('CREATE TABLE')
+Execute function fn_evn_audit();
+
+
+
+__CURSOR__
+DECLARE cursor_name refcursor;
+
+DO
+$$
+DECLARE
+    out_text text default '';
+    rec record;
+  cur_all_emp CURSOR
+  FOR
+  SELECT
+      *
+  from
+  employees;
+    BEGIN
+    open  cur_all_emp;
+    LOOP
+        FETCH cur_all_emp into rec;
+        EXIT WHEN NOT FOUND;
+        out_text = out_text || ',' || rec.first_name;
+    end loop;
+    RAISE NOTICE 'All Employees First Name: %', out_text;
+    END;
+$$ LANGUAGE plpgsql;
+
+
+__CROSS TABS__
+
+CREATE EXTENSION IF NOT EXISTS tablefunc
+
+
+SELECT * FROM crosstab
+(
+    '
+ SELECT location, year, sum(raindays)::int from rainfalls GROUP BY location,year ORDER BY location,year desc;
+    '
+ )AS ct
+(
+"location" text,
+   "2012" int,    --Uniques
+   "2013" int,
+   "2014"  int,
+   "2015" int,
+   "2016" int,
+   "2017" int
+
+
+ );
+ 
+ 
+__TRANSACTION__
+BEGIN
+code
+COMMIT;
+ROLLBACK:
+
+SAVEPOINT svp1;
+
+ROLLBACK TO svp1;
+
+
+
+  
+
   
   
   

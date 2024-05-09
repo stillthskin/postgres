@@ -1,0 +1,4 @@
+Java 17
+Wrapper class //A way to use primitives as objects Of int is Integer
+Literal = constant oppose variable;
+_Score to denote millions Int billion = 1_000_000_000;
